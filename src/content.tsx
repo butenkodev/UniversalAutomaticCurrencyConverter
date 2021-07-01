@@ -134,8 +134,6 @@ async function detectAllElements(parent: HTMLElement): Promise<CurrencyElement[]
         await element.convertTo(currency);
         element.setupListener();
         await element.show();
-        if (tabState.isShowingConversions && !tabState.isPaused)
-            element.highlight();
     }
 
     discovered.forEach(e => tabState.conversions.push(e));

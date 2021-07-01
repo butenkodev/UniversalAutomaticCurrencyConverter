@@ -3,22 +3,12 @@ import {CurrencyElement} from '../Currency';
 export class TabState {
     private _isAllowed: boolean
     private _isShowingConversions: boolean
-    private _isPaused: boolean
     conversions: CurrencyElement[]
 
     constructor() {
         this._isAllowed = false;
         this._isShowingConversions = false;
-        this._isPaused = false;
         this.conversions = []
-    }
-
-    get isPaused(): boolean {
-        return this._isPaused
-    }
-
-    setIsPaused(value: boolean) {
-        this._isPaused = value;
     }
 
     get isAllowed(): boolean {

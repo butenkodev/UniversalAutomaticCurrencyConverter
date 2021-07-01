@@ -1,3 +1,5 @@
+import {useProvider} from "../../infrastructure";
+
 export class ElementSnapshot {
 
     private readonly nodes: Node[]
@@ -32,6 +34,9 @@ export class ElementSnapshot {
     }
 
     display(): void {
+        // If we are paused, logic will still apply, but website will never be altered
+        if (useProvider().isPaused.value) return;
+
         for (let i = 0; i < this.texts.length; i++)
             this.nodes[i].textContent = this.texts[i];
     }

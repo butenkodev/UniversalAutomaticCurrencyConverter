@@ -5,6 +5,7 @@ import {CurrencyAmount} from "./CurrencyAmount";
 import {IActiveLocalization} from "../Localization";
 import {DependencyProvider, useProvider} from '../../infrastructure/DependencyInjection';
 import {ILogger} from "../../infrastructure";
+import {IsPausedSetting, usingConversionHighlightingSetting} from "../../infrastructure/Configuration/Configuration";
 
 type CurrencyInfo = {
     original: CurrencyAmount,
@@ -31,16 +32,22 @@ export class CurrencyElement {
     private localization: IActiveLocalization;
     private readonly provider: DependencyProvider
     private logger: ILogger;
+    private isPaused: IsPausedSetting;
+    private usingHighlight: usingConversionHighlightingSetting;
 
     constructor({
                     provider,
+                    isPaused,
+                    usingConversionHighlighting,
                     backendApi,
                     textDetector,
                     activeLocalization,
                     logger
                 }: DependencyProvider,
                 element: HTMLElement) {
+        this.isPaused = isPaused;
         this.logger = logger;
+        this.usingHighlight = usingConversionHighlighting;
         this.id = ++CurrencyElement.nextId;
         this.provider = provider;
 
@@ -68,8 +75,7 @@ export class CurrencyElement {
 
     show(): Promise<boolean> {
         const {tabState} = useProvider();
-        if (tabState.isPaused)
-            return this.showOriginal()
+        if (!tabState.isShowingConversions) return this.showOriginal()
 
         return tabState.isShowingConversions
             ? this.showConverted()
@@ -106,7 +112,7 @@ export class CurrencyElement {
     async updateDisplay(): Promise<void> {
         this.updateSnapshots()
         await this.convert();
-        if (this._isShowingConversion) this.converted.display()
+        if (this._isShowingConversion && !this.isPaused.value) this.converted.display()
         else this.original.display()
     }
 
@@ -118,18 +124,20 @@ export class CurrencyElement {
         const convertOnHover = this.provider.usingHoverFlipConversion.value
         const shortcutHover = this.provider.convertHoverShortcut.value
 
-        if (convertOnClick)
-            this.element.addEventListener('click', () => self.flipDisplay());
+        if (convertOnClick) this.element.addEventListener('click', () => self.flipDisplay());
 
-        if (shortcutHover) {
-            this.element.addEventListener('mouseover', () => this.isHovered = true);
-            this.element.addEventListener('mouseout', () => this.isHovered = false);
+        if (shortcutHover || convertOnHover) {
+            this.element.addEventListener('mouseover', async () => {
+                self.isHovered = true;
+                await self.flipDisplay();
+            });
+            this.element.addEventListener('mouseout', async () => {
+                self.isHovered = false;
+                await self.flipDisplay();
+            });
         }
 
-        if (convertOnHover) {
-            this.element.addEventListener('mouseover', () => self.flipDisplay());
-            this.element.addEventListener('mouseout', () => self.flipDisplay());
-        }
+        this.highlight()
     }
 
     async convert(): Promise<void> {
@@ -221,7 +229,8 @@ export class CurrencyElement {
     }
 
     highlight() {
-        if (!this.provider.usingConversionHighlighting.value) return;
+        if (this.isPaused.value) return;
+        if (!this.usingHighlight.value) return;
         const color = this.provider.highlightColor.value;
         const duration = this.provider.highlightDuration.value;
         const oldColor = this.element.style.textShadow;

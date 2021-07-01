@@ -47,18 +47,20 @@ export const RangeContainer = styled(BaseInput)<RangeContainerProps>`
   height: ${asPixel(FieldHeight / 2)};
   width: 80%;
   appearance: auto;
-  border-width: 0;
+  border-bottom-width: 0;
 
   &[type="range"] {
     -webkit-appearance: none;
     background: transparent; /* Otherwise white in Chrome */
     display: inline-block;
     vertical-align: middle;
+    border-bottom-width: 0;
   }
 
   &[type="range"]:focus {
     -webkit-appearance: none;
     outline: none;
+    border-bottom-width: 0;
   }
 
   &[type="range"]::-webkit-slider-thumb {
