@@ -17,14 +17,7 @@ export type OptionsAppProps = {
     symbols: { label: string, value: string }[]
 }
 
-export type OptionCardProps = {
-    filter: string
-    setTheme: React.Dispatch<React.SetStateAction<keyof typeof themes>>,
-    symbols: { label: string, value: string }[]
-}
-
 export default function OptionsApp(props: OptionsAppProps): JSX.Element {
-
     const [filter, setFilter] = useState<string>('')
 
     function wrap(children: JSX.Element[] | JSX.Element) {

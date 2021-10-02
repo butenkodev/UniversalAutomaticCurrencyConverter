@@ -234,6 +234,7 @@ export class BrowserMock implements IBrowser {
                 }.symbols);
             }
         };
+        
         // @ts-ignore
         this.tab = {}
         this.popup = {}
